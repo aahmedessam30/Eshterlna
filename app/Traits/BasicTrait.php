@@ -51,8 +51,7 @@ trait BasicTrait
         }
 
         //Http request to connect with FCM
-        $response = Http::withHeaders($headers)
-            ->post($url, $fields);
+        $response = Http::withHeaders($headers)->post($url, $fields);
 
         return $response;
     }
