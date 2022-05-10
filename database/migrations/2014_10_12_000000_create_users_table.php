@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('email', 150)->unique();
             $table->string('phone', 20)->unique();
             $table->string('image', 150)->nullable();
-            $table->string('device_key', 150)->nullable();
+            $table->text('device_key', 150)->nullable();
             $table->string('address')->nullable();
             $table->enum('type', ['customer', 'merchant'])->default('customer');
             $table->enum('status', ['active', 'in_active'])->default('in_active');

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,6 +25,7 @@ class SettingFactory extends Factory
             'terms_ar'    => $this->faker->paragraph,
             'terms_en'    => $this->faker->paragraph,
             'theme'       => $this->faker->randomElement(['light', 'dark']),
+            'user_id'     => User::all()->random()->id,
         ];
     }
 }
