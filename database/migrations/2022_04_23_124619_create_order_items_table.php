@@ -21,10 +21,10 @@ return new class extends Migration
             $table->foreignIdFor(Item::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->decimal('quantity', 10, 2);
             $table->decimal('price', 10, 2);
-            $table->decimal('discount', 10, 2);
-            $table->decimal('tax', 10, 2);
-            $table->decimal('shipping', 10, 2);
-            $table->decimal('weight', 10, 2);
+            $table->decimal('discount', 10, 2)->default(0);
+            $table->decimal('tax', 10, 2)->default(0);
+            $table->decimal('shipping', 10, 2)->default(0);
+            $table->decimal('weight', 10, 2)->default(0);
             $table->timestamps();
         });
     }

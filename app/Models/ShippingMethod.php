@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class ShippingMethod extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['name_ar', 'name_en', 'price'];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Vat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -34,6 +35,8 @@ class ItemFactory extends Factory
             'brand_id'       => Brand::all()->random()->id,
             'category_id'    => Category::all()->random()->id,
             'user_id'        => User::all()->random()->id,
+            'vat_id'         => Vat::all()->random()->id,
+            'vat_state'      => $this->faker->randomElement(['0', '1' ,'2']),
         ];
     }
 }

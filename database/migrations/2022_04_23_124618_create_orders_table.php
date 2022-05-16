@@ -8,8 +8,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -23,7 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(Store::class)->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
             $table->foreignIdFor(PaymentMethod::class)->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
             $table->foreignIdFor(ShippingMethod::class)->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
-            $table->enum('status', ['pending', 'processing', 'on_delivery', 'delivered', 'canceled'])->default('pending');
+            $table->enum('status', [0, 1, 2, 3, 4, 5])->default(0); //0 => 'pending', 1 => 'processing', 2 => 'on_delivery', 3 => 'delivered', 4 => 'canceled'
             $table->decimal('total_price', 10, 2);
             $table->decimal('total_discount', 10, 2);
             $table->decimal('total_tax', 10, 2);

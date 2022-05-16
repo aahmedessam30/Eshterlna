@@ -20,6 +20,8 @@ return new class extends Migration {
             $table->foreignIdFor(User::class)->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignIdFor(Brand::class)->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignIdFor(\App\Models\Vat::class)->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
+            $table->enum('vat_state', [0, 1, 2])->default(0);
             $table->string('name_ar', 100);
             $table->string('name_en', 100);
             $table->string('image', 150)->nullable();

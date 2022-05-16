@@ -17,7 +17,9 @@ class PaymentMethodFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'name_ar' => $this->faker->word,
+            'name_en' => $this->faker->word,
+            'price'   => $this->faker->randomFloat(2, 0, 100),
         ];
     }
 }

@@ -2,12 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ShippingMethod>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Vat>
  */
-class ShippingMethodFactory extends Factory
+class VatFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,7 +20,8 @@ class ShippingMethodFactory extends Factory
         return [
             'name_ar' => $this->faker->word,
             'name_en' => $this->faker->word,
-            'price'   => $this->faker->randomFloat(2, 0, 100),
+            'value'   => $this->faker->randomElement([14 , 15]),
+            'user_id' => User::all()->random()->id,
         ];
     }
 }

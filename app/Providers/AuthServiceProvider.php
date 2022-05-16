@@ -9,6 +9,7 @@ use App\Models\Color;
 use App\Models\Country;
 use App\Models\Favourite;
 use App\Models\Item;
+use App\Models\Order;
 use App\Models\Review;
 use App\Models\Setting;
 use App\Models\Size;
@@ -20,6 +21,7 @@ use App\Policies\ColorPolicy;
 use App\Policies\CountryPolicy;
 use App\Policies\FavouritePolicy;
 use App\Policies\ItemPolicy;
+use App\Policies\OrderPolicy;
 use App\Policies\ReviewPolicy;
 use App\Policies\SettingPolicy;
 use App\Policies\SizePolicy;
@@ -42,6 +44,7 @@ class AuthServiceProvider extends ServiceProvider
         Color::class     => ColorPolicy::class,
         Brand::class     => BrandPolicy::class,
         Store::class     => StorePolicy::class,
+        Order::class     => OrderPolicy::class,
         Review::class    => ReviewPolicy::class,
         Setting::class   => SettingPolicy::class,
         Category::class  => CategoryPolicy::class,

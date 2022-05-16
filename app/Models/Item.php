@@ -11,7 +11,7 @@ class Item extends Model
 {
     use HasFactory, BasicTrait;
 
-    protected $with = ['category', 'brand', 'merchant'];
+    protected $with = ['category', 'brand', 'merchant' , 'vat'];
 
     protected $fillable = [
         'name_ar',
@@ -28,22 +28,24 @@ class Item extends Model
         'category_id',
         'brand_id',
         'user_id',
+        'vat_id',
+        'vat_state'
     ];
 
-    public function __construct()
-    {
-        if (getSettings()->size == 1) {
-            array_push($this->with, 'sizes');
-        }
-
-        if (getSettings()->color == 1) {
-            array_push($this->with, 'colors');
-        }
-
-        if (getSettings()->store == 1) {
-            array_push($this->with, 'stores');
-        }
-    }
+//    public function __construct()
+//    {
+//        if (getSettings()->size == 1) {
+//            array_push($this->with, 'sizes');
+//        }
+//
+//        if (getSettings()->color == 1) {
+//            array_push($this->with, 'colors');
+//        }
+//
+//        if (getSettings()->store == 1) {
+//            array_push($this->with, 'stores');
+//        }
+//    }
 
     public function getNameAttribute()
     {
@@ -120,5 +122,10 @@ class Item extends Model
     public function merchant()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function vat()
+    {
+        return $this->belongsTo(Vat::class);
     }
 }

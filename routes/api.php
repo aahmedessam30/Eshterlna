@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CountryController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FavouriteController;
 use App\Http\Controllers\Api\ColorController;
@@ -61,4 +62,5 @@ Route::apiResource('sizes', SizeController::class);
 Route::apiResource('reviews', ReviewController::class);
 Route::apiResource('favourites', FavouriteController::class);
 Route::apiResource('settings', SettingController::class);
+Route::apiResource('orders', OrderController::class);
 
