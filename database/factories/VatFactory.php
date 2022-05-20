@@ -21,7 +21,7 @@ class VatFactory extends Factory
             'name_ar' => $this->faker->word,
             'name_en' => $this->faker->word,
             'value'   => $this->faker->randomElement([14 , 15]),
-            'user_id' => User::all()->random()->id,
+            'user_id' => User::merchant()->get()->random()->id,
         ];
     }
 }

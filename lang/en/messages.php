@@ -8,4 +8,5 @@ return [
     'unauthorized'     =>'You are not authorized to access this page',
     'cant_update'      => 'You can not update this record',
     'cant_delete'      => 'You can not delete this record',
+    'not_found'        => 'Record not found',
 ];

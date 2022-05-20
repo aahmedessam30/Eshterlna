@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,7 +21,11 @@ class Order extends Model
         'total_tax',
         'total_shipping',
         'total_weight',
-        'total_items'
+        'total_items',
+        'ordered_at',
+        'shipped_at',
+        'cancelled_at',
+        'completed_at'
     ];
 
     protected $with = ['items'];
@@ -28,6 +33,35 @@ class Order extends Model
     protected $dates = [
         'ordered_at', 'shipped_at', 'cancelled_at', 'completed_at'
     ];
+
+    public function getStatusAttribute($value)
+    {
+        return $value == 0 ? 'Pending'
+            : ($value == 1 ? 'Processing'
+                : ($value == 2 ? 'On Delivery'
+                    : ($value == 3 ? 'Delivered'
+                        : 'Cancelled')));
+    }
+
+    public function getOrderedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d-m-Y H:i:s');
+    }
+
+    public function getShippedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d-m-Y H:i:s');
+    }
+
+    public function getCancelledAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d-m-Y H:i:s');
+    }
+
+    public function getCompletedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d-m-Y H:i:s');
+    }
 
     public function user()
     {
@@ -54,14 +88,5 @@ class Order extends Model
         return $this->belongsToMany(Item::class, 'order_items')
             ->withPivot('quantity', 'price', 'discount', 'tax', 'shipping', 'weight')
             ->withTimestamps();
-    }
-
-    public function getStatusAttribute($value)
-    {
-        return $value == 0 ? 'Pending'
-            : ($value == 1 ? 'Processing'
-                : ($value == 2 ? 'On Delivery'
-                    : ($value == 3 ? 'Delivered'
-                        : 'Cancelled')));
     }
 }

@@ -25,7 +25,7 @@ class CategoryFactory extends Factory
             'description_en' => $this->faker->sentence,
             'online'         => $this->faker->randomElement([0, 1]),
             'category_id'    => $this->faker->numberBetween(0, 20),
-            'user_id'        => User::all()->random()->id,
+            'user_id' => User::merchant()->get()->random()->id,
         ];
     }
 }

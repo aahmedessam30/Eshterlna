@@ -21,7 +21,7 @@ class OrderFactory extends Factory
     public function definition()
     {
         return [
-            'user_id'            => User::all()->random()->id,
+            'user_id'            => User::merchant()->get()->random()->id,
             'store_id'           => Store::all()->random()->id,
             'payment_method_id'  => PaymentMethod::all()->random()->id,
             'shipping_method_id' => ShippingMethod::all()->random()->id,

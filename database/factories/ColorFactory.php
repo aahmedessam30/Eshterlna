@@ -22,7 +22,7 @@ class ColorFactory extends Factory
             'name_en'   => $this->faker->word,
             'colorHash' => $this->faker->hexColor,
             'online'    => $this->faker->boolean,
-            'user_id'        => User::all()->random()->id,
+            'user_id' => User::merchant()->get()->random()->id,
         ];
     }
 }

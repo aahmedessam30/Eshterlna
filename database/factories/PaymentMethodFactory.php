@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +20,7 @@ class PaymentMethodFactory extends Factory
         return [
             'name_ar' => $this->faker->word,
             'name_en' => $this->faker->word,
-            'price'   => $this->faker->randomFloat(2, 0, 100),
+            'user_id' => User::merchant()->get()->random()->id,
         ];
     }
 }

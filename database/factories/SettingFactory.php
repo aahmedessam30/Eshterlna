@@ -25,7 +25,7 @@ class SettingFactory extends Factory
             'terms_ar'    => $this->faker->paragraph,
             'terms_en'    => $this->faker->paragraph,
             'theme'       => $this->faker->randomElement(['light', 'dark']),
-            'user_id'     => 1,
+            'user_id'     => User::merchant()->get()->random()->id,
         ];
     }
 }

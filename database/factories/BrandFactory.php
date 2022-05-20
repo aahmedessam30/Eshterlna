@@ -24,7 +24,6 @@ class BrandFactory extends Factory
             'description_en' => $this->faker->sentence,
             'online'         => $this->faker->boolean,
             'code'           => $this->faker->randomNumber(9),
-            'user_id'        => User::all()->random()->id,
-        ];
+            'user_id' => User::merchant()->get()->random()->id,        ];
     }
 }

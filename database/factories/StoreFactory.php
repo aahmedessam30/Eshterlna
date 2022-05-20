@@ -29,7 +29,7 @@ class StoreFactory extends Factory
             'lng'        => $this->faker->longitude,
             'online'     => $this->faker->boolean,
             'city_id'    => City::all()->random(),
-            'user_id'        => User::all()->random()->id,
+            'user_id'    => User::merchant()->get()->random()->id,
         ];
     }
 }

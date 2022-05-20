@@ -6,6 +6,7 @@ use App\Helpers;
 use App\Models\Item;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemRequest;
+use App\Models\Store;
 use Illuminate\Support\Facades\App;
 use App\Http\Resources\ItemResource;
 use App\Http\Resources\BasicResource;
@@ -23,7 +24,7 @@ class ItemController extends Controller
     public function index()
     {
         return ItemResource::collection(Item::whereOnline()->latest('id')->paginate(config('global.pagination')))
-            ->additional(['status' => 'success']);
+            ->additional(['status' => true]);
     }
 
     public function store(ItemRequest $request)
@@ -51,7 +52,7 @@ class ItemController extends Controller
         }
 
         return (new ItemResource($item))
-            ->additional(['status' => 'success', 'message' => __('messages.store_success')]);
+            ->additional(['status' => true, 'message' => __('messages.store_success')]);
     }
 
     public function show(Item $item)
@@ -88,7 +89,7 @@ class ItemController extends Controller
             }
 
             return (new ItemResource($item))
-                ->additional(['status' => 'success', 'message' => __('messages.update_success')]);
+                ->additional(['status' => true, 'message' => __('messages.update_success')]);
         } else {
             return new BasicResource(false, $response->message(), 'message');
         }
@@ -102,6 +103,26 @@ class ItemController extends Controller
 
             $item->delete();
             return new BasicResource(true, __('messages.delete_success'), 'message');
+        } else {
+            return new BasicResource(false, $response->message(), 'message');
+        }
+    }
+
+    public function deleteItemStore(Item $item, Store $store)
+    {
+        $response = Gate::inspect('delete', $item);
+
+        if ($response->allowed()) {
+
+            if ($item->stores->contains($store->id)) {
+
+                // Delete item from store
+                $item->stores()->detach($store->id);
+
+                return new BasicResource(true, __('messages.delete_success'), 'message');
+            } else {
+                return new BasicResource(false, __('messages.not_found'), 'message');
+            }
         } else {
             return new BasicResource(false, $response->message(), 'message');
         }

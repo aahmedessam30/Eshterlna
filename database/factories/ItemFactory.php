@@ -34,7 +34,7 @@ class ItemFactory extends Factory
             'online'         => $this->faker->boolean,
             'brand_id'       => Brand::all()->random()->id,
             'category_id'    => Category::all()->random()->id,
-            'user_id'        => User::all()->random()->id,
+            'user_id'        => User::merchant()->get()->random()->id,
             'vat_id'         => Vat::all()->random()->id,
             'vat_state'      => $this->faker->randomElement(['0', '1' ,'2']),
         ];

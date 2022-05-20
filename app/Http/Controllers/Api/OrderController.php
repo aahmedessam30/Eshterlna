@@ -28,14 +28,21 @@ class OrderController extends Controller
     public function store(OrderRequest $request)
     {
         $validated = $request->safe();
-        return $this->calculateOrder($validated['items_id'] , $validated['quantity']);
-        $order = Order::create($validated->merge(['user_id' => Auth::id()])->all());
+        $order_details = $this->calculateOrder($validated['items_id'], $validated['quantity']);
 
-        $order->items()->attach(
-            ['item_id' => $validated['item_id']],
-            ['quantity' => $validated['quantity']],
-            ['price' => $validated['price']]
-        );
+        $order = Order::create($validated->merge([
+            'user_id'        => Auth::id(),
+            'total_price'    => $order_details['total_price'],
+            'total_discount' => $order_details['total_discount'],
+            'total_tax'      => $order_details['total_tax'],
+            'total_shipping' => $order_details['total_shipping'],
+            'total_weight'   => $order_details['total_weight'],
+            'total_items'    => $order_details['total_items'],
+        ])->all());
+
+        foreach ($order_details['item_detail'] as $item) {
+            $order->items()->attach($item['item_id'] , $item);
+        }
 
         return (new OrderResource($order))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
@@ -43,7 +50,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        return (new OrderResource($order))->additional(['status' => true]);
+        return (new OrderResource($order->load('items')))->additional(['status' => true]);
     }
 
     public function update(OrderRequest $request, Order $order)
@@ -52,13 +59,26 @@ class OrderController extends Controller
 
         if ($response->allowed()) {
             $validated = $request->safe();
-            $order->update($validated->merge(['user_id' => Auth::id()])->all());
+            $order_details = $this->calculateOrder($validated['items_id'], $validated['quantity']);
 
-//            $order->items()->updateExistingPivot(
-//                ['item_id'  => $validated['item_id']],
-//                ['quantity' => $validated['quantity']],
-//                ['price'    => $validated['price']]
-//            );
+            $order->update($validated->merge([
+                'user_id'        => Auth::id(),
+                'total_price'    => $order_details['total_price'],
+                'total_discount' => $order_details['total_discount'],
+                'total_tax'      => $order_details['total_tax'],
+                'total_shipping' => $order_details['total_shipping'],
+                'total_weight'   => $order_details['total_weight'],
+                'total_items'    => $order_details['total_items'],
+                'ordered_at'     => now(),
+            ])->all());
+
+            // Detach all items
+            $order->items()->detach();
+
+            // Attach new items
+            foreach ($order_details['item_detail'] as $item) {
+                $order->items()->attach($item['item_id'] , $item);
+            }
 
             return (new OrderResource($order))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
@@ -80,11 +100,13 @@ class OrderController extends Controller
         }
     }
 
-    public function calculateOrder($items , $quantity)
+    public function calculateOrder($items, $quantity)
     {
-        $order = [];
+        $order = collect();
+        $item_detail = collect();
         $sale_tax = 0;
         $pay_tax = 0;
+        $total_basic_price = 0;
         $total_price = 0;
         $total_discount = 0;
         $total_tax = 0;
@@ -96,11 +118,13 @@ class OrderController extends Controller
             $sale_price = $item->sale_price;
             $pay_price = $item->pay_price;
 
+            // If item is not included tax
             if ($item->vat_state == 1) {
                 $sale_tax = $item->sale_price * ($item->vat->value / 100);
                 $pay_tax = $item->pay_price * ($item->vat->value / 100);
             }
 
+            // If item is included tax
             if ($item->vat_state == 2) {
                 $sale_price = $item->sale_price / (1 + $item->vat->value / 100);
                 $pay_price = $item->pay_price / (1 + $item->vat->value / 100);
@@ -112,17 +136,31 @@ class OrderController extends Controller
                 $pay_tax = $item->pay_price - $pay_price;
             }
 
-            $total_price += $sale_price * $quantity[$index];
+            $item_detail->put($index, [
+                'item_id'  => $item->id,
+                'quantity' => $quantity[$index],
+                'price'    => round($sale_price * $quantity[$index], 2),
+                'tax'      => round($sale_tax * $quantity[$index], 2),
+                'shipping' => round($item->shipping * $quantity[$index], 2),
+                'weight'   => round($item->weight * $quantity[$index], 2),
+                'discount' => round($item->discount * $quantity[$index], 2),
+            ]);
+
+            $total_basic_price += $sale_price * $quantity[$index];
             $total_discount += $item->discount * $quantity[$index];
             $total_tax += $sale_tax * $quantity[$index];
             $total_shipping += $item->shipping * $quantity[$index];
             $total_weight += $item->weight * $quantity[$index];
+            $total_price = $total_basic_price + $total_tax + $total_shipping + $total_weight - $total_discount;
 
-            $order['total_price'] = $total_price;
-            $order['total_discount'] = $total_discount;
-            $order['total_tax'] = $total_tax;
-            $order['total_shipping'] = $total_shipping;
-            $order['total_weight'] = $total_weight;
+            $order['item_detail'] = $item_detail;
+            $order['total_basic_price'] = round($total_basic_price, 2);
+            $order['total_discount'] = round($total_discount, 2);
+            $order['total_tax'] = round($total_tax, 2);
+            $order['total_shipping'] = round($total_shipping, 2);
+            $order['total_weight'] = round($total_weight, 2);
+            $order['total_price'] = round($total_price, 2);
+            $order['total_items'] = count($items);
         }
 
         return $order;

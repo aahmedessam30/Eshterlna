@@ -21,7 +21,7 @@ class SizeFactory extends Factory
             'name_ar' => $this->faker->word,
             'name_en' => $this->faker->word,
             'online'  => $this->faker->boolean,
-            'user_id'        => User::all()->random()->id,
+            'user_id' => User::merchant()->get()->random()->id,
         ];
     }
 }
