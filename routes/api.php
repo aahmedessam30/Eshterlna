@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\FavouriteController;
 use App\Http\Controllers\Api\ColorController;
 use App\Http\Controllers\Api\SizeController;
 use App\Http\Controllers\Api\VatController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\Auth\ForgetPasswordController;
@@ -71,3 +72,9 @@ Route::apiResource('payment-methods', PaymentMethodController::class);
 Route::apiResource('shipping-methods', ShippingMethodController::class);
 Route::apiResource('vats', VatController::class);
 
+// Notifications
+Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+Route::get('notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
+Route::post('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+Route::delete('notifications/{notification}/delete', [NotificationController::class, 'destroy'])->name('notifications.delete');

@@ -36,6 +36,8 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken("Personal Access Token")->accessToken;
 
+        sendFireBaseNotification($user, __('auth.login_success'));
+
         return new AuhtResource(true, $user, $token, __('auth.login_success'));
     }
 

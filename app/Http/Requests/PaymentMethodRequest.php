@@ -29,24 +29,24 @@ class PaymentMethodRequest extends FormRequest
             return [
                 'name_ar'        => ['required', 'string', 'max:255', Rule::unique('payment_methods')
                     ->where(fn ($query) => $query->where('user_id', Auth::guard('api')->user()->id))],
-                'name_en'        => ['required', 'string', 'max:255' , Rule::unique('payment_methods')
+                'name_en'        => ['required', 'string', 'max:255', Rule::unique('payment_methods')
                     ->where(fn ($query) => $query->where('user_id', Auth::guard('api')->user()->id))],
             ];
         } elseif ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
             return [
                 'name_ar'        => ['sometimes', 'string', 'max:255', Rule::unique('payment_methods')
                     ->where(fn ($query) => $query->where('user_id', Auth::guard('api')->user()->id))
-                    ->ignore($this->route('payment_method'))],
+                    ->ignore($this->route('payment_method')->id)],
                 'name_en'        => ['sometimes', 'string', 'max:255', Rule::unique('payment_methods')
                     ->where(fn ($query) => $query->where('user_id', Auth::guard('api')->user()->id))
-                    ->ignore($this->route('payment_method'))],
+                    ->ignore($this->route('payment_method')->id)],
             ];
         }
     }
 
     public function messages()
     {
-        if ($this->header('Accept-Language') == 'ar'){
+        if ($this->header('Accept-Language') == 'ar') {
             return [
                 'name_ar.required' => 'اسم الدفعة بالعربية مطلوب',
                 'name_ar.string'   => 'اسم الدفعة بالعربية يجب ان يكون سلسلة',
@@ -57,7 +57,7 @@ class PaymentMethodRequest extends FormRequest
                 'name_en.max'      => 'اسم الدفعة بالانجليزية يجب ان لا يزيد عن 255 حرف',
                 'name_en.unique'   => 'اسم الدفعة بالانجليزية موجود مسبقا',
             ];
-        }else{
+        } else {
             return [
                 'name_ar.required' => 'Payment Method Name in Arabic is required',
                 'name_ar.string'   => 'Payment Method Name in Arabic must be a string',

@@ -58,7 +58,7 @@ class PaymentMethodController extends Controller
         if ($response->allowed()) {
             $paymentMethod->delete();
 
-            return new BasicResource(true, __('messages.delete_success'));
+            return new BasicResource(true, __('messages.delete_success') , 'message');
         }else {
             return new BasicResource(false, $response->message(), 'message');
         }

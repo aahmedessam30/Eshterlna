@@ -15,7 +15,7 @@ class VatController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api', 'merchant'])->except(['index', 'show']);
+        $this->middleware(['auth:api', 'merchant']);
     }
 
     public function index()
@@ -58,7 +58,7 @@ class VatController extends Controller
         if ($response->allowed()) {
             $vat->delete();
 
-            return new BasicResource(true, __('messages.delete_success'));
+            return new BasicResource(true, __('messages.delete_success') , 'message');
         }else{
             return new BasicResource(false, $response->message(), 'message');
         }
