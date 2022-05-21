@@ -11,6 +11,11 @@ class Review extends Model
 
     protected $fillable = ['user_id', 'item_id', 'review', 'rating'];
 
+    public function scopeAuth($query)
+    {
+        return $query->where('user_id', auth('api')->id());
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

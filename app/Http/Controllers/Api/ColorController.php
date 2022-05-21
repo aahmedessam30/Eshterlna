@@ -7,7 +7,9 @@ use App\Http\Requests\ColorRequest;
 use App\Http\Resources\BasicResource;
 use App\Http\Resources\ColorResource;
 use App\Models\Color;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class ColorController extends Controller
@@ -25,7 +27,11 @@ class ColorController extends Controller
 
     public function store(ColorRequest $request)
     {
-        $color = Color::create($request->validated());
+        $color = Color::create($request->safe()->merge(['user_id' => auth('api')->id()])->all());
+
+        // Send Notification For All Customers
+        sendFireBaseNotification(User::customer()->get(), __('notification.new_color', ['name' => $color->name]));
+
         return (new ColorResource($color))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
     }
@@ -42,7 +48,11 @@ class ColorController extends Controller
 
         if ($response->allowed()) {
 
-            $color->update($request->validated());
+            $color->update($request->safe()->merge(['user_id' => auth('api')->id()])->all());
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.update_color', ['name' => $color->name]));
+
             return (new ColorResource($color))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
         } else {
@@ -57,6 +67,10 @@ class ColorController extends Controller
         if ($response->allowed()) {
 
             $color->delete();
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.delete_color', ['name' => $color->name]));
+
             return new BasicResource(true, __('messages.delete_success'), 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');

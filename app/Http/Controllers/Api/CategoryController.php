@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\BasicResource;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Helpers;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
@@ -26,7 +28,11 @@ class CategoryController extends Controller
 
     public function store(CategoryRequest $request)
     {
-        $category = Category::create($request->validated());
+        $category = Category::create($request->safe()->merge(['user_id' => auth()->id()])->all());
+
+        // Send Notification For All Customers
+        sendFireBaseNotification(User::customer()->get(), __('notification.new_category', ['name' => $category->name]));
+
         return (new CategoryResource($category))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
     }
@@ -42,8 +48,12 @@ class CategoryController extends Controller
 
         if ($response->allowed()) {
 
-            $category->update($request->validated());
-            return (new CategoryResource($category))
+            $category->update($request->safe()->merge(['user_id' => auth()->id()])->all());
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.update_category', ['name' => $category->name]));
+
+            return (new CategoryResource($category->load('subCategories')))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
         } else {
             return new BasicResource(false, $response->message(), 'message');
@@ -57,6 +67,10 @@ class CategoryController extends Controller
         if ($response->allowed()) {
 
             $category->delete();
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.delete_category', ['name' => $category->name]));
+
             return new BasicResource(true, __('messages.delete_success'), 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');

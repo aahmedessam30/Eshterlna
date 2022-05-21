@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ReviewRequest;
 use App\Http\Resources\BasicResource;
 use App\Http\Resources\ReviewResource;
+use App\Models\Item;
 use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,15 +19,21 @@ class ReviewController extends Controller
         $this->middleware('auth:api')->except(['index', 'show']);
     }
 
-    public function index()
+    public function index(ReviewRequest $request)
     {
-        return ReviewResource::collection(Review::latest()->paginate(config('global.pagination')))
+        return ReviewResource::collection(Review::where('item_id', $request->safe()->item_id)
+            ->latest()
+            ->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 
     public function store(ReviewRequest $request)
     {
         $review = Review::create($request->safe()->merge(['user_id' => Auth::id()])->all());
+
+        // Send Notification For Authorized Customer
+        sendFireBaseNotification(Auth::user(), __('notification.review_added',
+            ['name' => Item::find($request->safe()->item_id)->name, 'customer' => Auth::user()->name]));
 
         return (new ReviewResource($review))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
@@ -44,6 +51,11 @@ class ReviewController extends Controller
         if ($response->allowed()) {
 
             $review->update($request->safe()->merge(['user_id' => Auth::id()])->all());
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.review_updated',
+                ['name' => Item::find($request->safe()->item_id)->name, 'customer' => Auth::user()->name]));
+
             return (new ReviewResource($review))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
         } else {
@@ -59,6 +71,11 @@ class ReviewController extends Controller
         if ($response->allowed()) {
 
             $review->delete();
+
+            // Send Notification For Authorized Customer
+            sendFireBaseNotification(Auth::user(), __('notification.review_deleted',
+                ['name' => Item::find($review->item_id)->name, 'customer' => Auth::user()->name]));
+
             return new BasicResource(true, __('messages.delete_success'), 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');

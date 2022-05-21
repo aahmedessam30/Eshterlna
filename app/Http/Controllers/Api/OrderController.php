@@ -8,6 +8,7 @@ use App\Http\Resources\BasicResource;
 use App\Http\Resources\OrderResource;
 use App\Models\Item;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -21,12 +22,13 @@ class OrderController extends Controller
 
     public function index()
     {
-        return OrderResource::collection(Order::latest()->paginate(config('global.pagination')))
+        return OrderResource::collection(Order::auth()->latest()->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 
     public function store(OrderRequest $request)
     {
+        $merchants = collect();
         $validated = $request->safe();
         $order_details = $this->calculateOrder($validated['items_id'], $validated['quantity']);
 
@@ -42,7 +44,16 @@ class OrderController extends Controller
 
         foreach ($order_details['item_detail'] as $item) {
             $order->items()->attach($item['item_id'] , $item);
+
+            $merchant = Item::find($item['item_id'])->merchant;
+            $merchants->push($merchant);
         }
+
+        // Send Notification For Merchant
+        SendFireBaseNotification($merchants, __('notification.new_order_merchant' , ['order_id' => $order->id , 'customer' => $order->user->name]));
+
+        // Send Notification For Customer
+        sendFireBaseNotification(Auth::user(), __('notification.new_order_customer' , ['order_id' => $order->id]));
 
         return (new OrderResource($order))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
@@ -58,6 +69,7 @@ class OrderController extends Controller
         $response = Gate::inspect('update', $order);
 
         if ($response->allowed()) {
+            $merchants = collect();
             $validated = $request->safe();
             $order_details = $this->calculateOrder($validated['items_id'], $validated['quantity']);
 
@@ -78,7 +90,16 @@ class OrderController extends Controller
             // Attach new items
             foreach ($order_details['item_detail'] as $item) {
                 $order->items()->attach($item['item_id'] , $item);
+
+                $merchant = Item::find($item['item_id'])->merchant;
+                $merchants->push($merchant);
             }
+
+            // Send Notification For Merchant
+            SendFireBaseNotification($merchants, __('notification.update_order_merchant' , ['order_id' => $order->id , 'customer' => $order->user->name]));
+
+            // Send Notification For Customer
+            sendFireBaseNotification(Auth::user(), __('notification.update_order_customer' , ['order_id' => $order->id]));
 
             return (new OrderResource($order))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
@@ -93,7 +114,21 @@ class OrderController extends Controller
         $response = Gate::inspect('delete', $order);
 
         if ($response->allowed()) {
+
+            $merchants = collect();
+
+            // Add Merchant to Collection
+            $order->items()->each(fn($item)=> $merchants->push($item->merchant));
+
+            // Remove Order
             $order->delete();
+
+            // Send Notification For Merchant
+            SendFireBaseNotification($merchants, __('notification.delete_order_merchant' , ['order_id' => $order->id , 'customer' => $order->user->name]));
+
+            // Send Notification For Customer
+            sendFireBaseNotification(Auth::user(), __('notification.delete_order_customer' , ['order_id' => $order->id]));
+
             return new BasicResource(true, __('messages.delete_success') , 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');

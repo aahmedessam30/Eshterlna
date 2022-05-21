@@ -20,13 +20,16 @@ class VatController extends Controller
 
     public function index()
     {
-        return VatResource::collection(Vat::latest('id')->paginate(config('global.pagination')))
+        return VatResource::collection(Vat::auth()->latest('id')->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 
     public function store(VatRequest $request)
     {
         $vat = Vat::create($request->safe()->merge(['user_id' => Auth::id()])->all());
+
+        // Send Notification For Authorized Merchant
+        sendFireBaseNotification($vat->user, __('notification.vat_added'));
 
         return (new VatResource($vat))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
@@ -44,9 +47,12 @@ class VatController extends Controller
         if ($response->allowed()) {
             $vat->update($request->safe()->merge(['user_id' => Auth::id()])->all());
 
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification($vat->user, __('notification.vat_updated'));
+
             return (new VatResource($vat))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
-        }else{
+        } else {
             return new BasicResource(false, $response->message(), 'message');
         }
     }
@@ -58,8 +64,11 @@ class VatController extends Controller
         if ($response->allowed()) {
             $vat->delete();
 
-            return new BasicResource(true, __('messages.delete_success') , 'message');
-        }else{
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification($vat->user, __('notification.vat_deleted'));
+
+            return new BasicResource(true, __('messages.delete_success'), 'message');
+        } else {
             return new BasicResource(false, $response->message(), 'message');
         }
     }

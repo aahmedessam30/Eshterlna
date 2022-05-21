@@ -19,14 +19,20 @@ class StoreController extends Controller
 
     public function index()
     {
-        return StoreResource::collection(Store::whereOnline()->latest('id')->paginate(config('global.pagination')))
+        $stores = Auth::check() && Auth::user()->type == 'merchant'
+            ? Store::whereOnline()->auth()
+            : Store::whereOnline();
+
+        return StoreResource::collection($stores->latest('id')->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 
     public function store(StoreRequest $request)
     {
-        $store = Store::create($request->safe());
-        $store->merchants()->attach(['user_id' => Auth::user()->merchant()->first()->id]);
+        $store = Store::create($request->safe()->merge(['user_id' => Auth::id()])->all());
+
+        // Send Notification For Authorized Merchant
+        sendFireBaseNotification(Auth::user(), __('notification.store_added' ,['name' => $store->name]));
 
         return (new StoreResource($store))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
@@ -43,8 +49,10 @@ class StoreController extends Controller
 
         if ($response->allowed()) {
 
-            $store->update($request->safe());
-            $store->merchants()->sync(['user_id' => Auth::user()->merchant()->first()->id]);
+            $store->update($request->safe()->merge(['user_id' => Auth::id()])->all());
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.store_updated' ,['name' => $store->name]));
 
             return (new StoreResource($store))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
@@ -60,6 +68,10 @@ class StoreController extends Controller
         if ($response->allowed()) {
 
             $store->delete();
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.store_deleted' ,['name' => $store->name]));
+
             return new BasicResource(true, __('messages.delete_success'), 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');

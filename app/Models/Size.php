@@ -11,7 +11,7 @@ class Size extends Model
 {
     use HasFactory, BasicTrait;
 
-    protected $fillable = ['name_ar', 'name_en', 'image', 'online'];
+    protected $fillable = ['name_ar', 'name_en', 'image', 'online', 'user_id'];
 
     public function scopeWhereOnline($query)
     {
@@ -38,6 +38,11 @@ class Size extends Model
         return $value == 0
             ? (App::isLocale('ar') ? 'غير مفعل' : 'Not Active')
             : (App::isLocale('ar') ? 'مفعل' : 'Active');
+    }
+
+    public function scopeAuth($query)
+    {
+        return $query->where('user_id', auth('api')->id());
     }
 
     public function items()

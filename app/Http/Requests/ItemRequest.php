@@ -41,7 +41,7 @@ class ItemRequest extends FormRequest
                 'brand_id'       => ['required', 'integer'],
                 'colors'         => ['array', 'exists:colors,id'],
                 'sizes'          => ['array', 'exists:sizes,id'],
-                'stores'         => ['required','array', 'exists:stores,id'],
+                'stores'         => ['required', 'array' , 'exists:stores,id'],
                 'quantity'       => ['required','array']
             ];
         } elseif ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
@@ -60,8 +60,8 @@ class ItemRequest extends FormRequest
                 'brand_id'       => ['sometimes', 'integer'],
                 'colors'         => ['sometimes', 'array' , 'exists:colors,id'],
                 'sizes'          => ['sometimes', 'array' , 'exists:sizes,id'],
-                'stores'         => ['sometimes', 'array' , 'exists:stores,id'],
-                'quantity'       => ['sometimes', 'array'],
+                'store_id'       => ['sometimes', 'integer' , 'exists:stores,id'],
+                'quantity'       => ['sometimes', 'integer'],
             ];
         }
     }
@@ -102,8 +102,12 @@ class ItemRequest extends FormRequest
                 'stores.required'         => 'المخازن مطلوبة',
                 'stores.array'            => 'المخازن يجب ان تكون في نوع مصفوفة',
                 'stores.exists'           => 'المخازن غير موجودة',
+                'store_id.required'       => 'المخزن مطلوب',
+                'store_id.integer'        => 'المخزن يجب ان يكون رقم',
+                'store_id.exists'         => 'المخزن غير موجود',
                 'quantity.required'       => 'الكمية مطلوبة',
-                'quantity.array'          => 'الكمية يجب ان تكون في نوع مصفوفة',
+                'quantity.array'          => 'يجب وضع كميات المنتجات فى المخازن',
+                'quantity.integer'        => 'الكمية يجب ان تكون رقم',
             ];
         } else {
             return [
@@ -134,8 +138,12 @@ class ItemRequest extends FormRequest
                 'colors.exists'           => 'Colors not found',
                 'sizes.array'             => 'Sizes must be an array',
                 'sizes.exists'            => 'Sizes not found',
+                'stores.required'         => 'Stores is required',
                 'stores.array'            => 'Stores must be an array',
                 'stores.exists'           => 'Stores not found',
+                'store_id.required'       => 'Store is required',
+                'store_id.integer'        => 'Store must be a number',
+                'store_id.exists'         => 'Store not found',
                 'quantity.required'       => 'Quantity is required',
                 'quantity.integer'        => 'Quantity must be a number',
                 'quantity.array'          => 'Quantity must be an array',

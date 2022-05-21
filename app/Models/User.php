@@ -66,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $query->where('type', 'merchant');
     }
 
+    public function scopeCustomer($query)
+    {
+        return $query->where('type', 'customer');
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class);

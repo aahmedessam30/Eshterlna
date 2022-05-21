@@ -17,6 +17,11 @@ class Vat extends Model
         return $this->{'name_' . App::getLocale()};
     }
 
+    public function scopeAuth($query)
+    {
+        return $query->where('user_id', auth('api')->id());
+    }
+
     public function items()
     {
         return $this->hasMany(Item::class);

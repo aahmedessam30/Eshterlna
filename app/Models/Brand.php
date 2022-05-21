@@ -18,7 +18,8 @@ class Brand extends Model
         'description_ar',
         'description_en',
         'online',
-        'code'
+        'code',
+        'user_id',
     ];
 
     public function getNameAttribute()

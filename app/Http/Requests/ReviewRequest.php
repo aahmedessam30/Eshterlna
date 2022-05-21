@@ -14,7 +14,7 @@ class ReviewRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check() ? true : false;
+        return true;
     }
 
     /**
@@ -24,7 +24,11 @@ class ReviewRequest extends FormRequest
      */
     public function rules()
     {
-        if($this->method() == 'POST'){
+        if($this->isMethod('GET')){
+            return [
+                'item_id' => ['required', 'integer', 'exists:items,id'],
+            ];
+        }elseif($this->method() == 'POST'){
             return [
                 'item_id' => ['required', 'integer', 'exists:items,id'],
                 'review'  => ['required', 'string', 'max:255'],

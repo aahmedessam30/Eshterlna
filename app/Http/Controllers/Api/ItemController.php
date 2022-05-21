@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemRequest;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Support\Facades\App;
 use App\Http\Resources\ItemResource;
 use App\Http\Resources\BasicResource;
@@ -31,7 +32,7 @@ class ItemController extends Controller
     {
         $validated = $request->safe();
 
-        $item = Item::create($validated->merge(['user_id' => Auth::id()]));
+        $item = Item::create($validated->merge(['user_id' => Auth::id()])->all());
 
         if ($request->has('sizes') && getSettings()->size == 1) {
             foreach ($validated['sizes'] as $size) {
@@ -45,11 +46,14 @@ class ItemController extends Controller
             }
         }
 
-        if ($request->has('store_id') && getSettings()->store == 1) {
+        if ($request->has('stores') && getSettings()->store == 1) {
             foreach ($validated['stores'] as $index => $store) {
                 $item->stores()->attach(['store_id' => $store], ['quantity' => $validated['quantity'][$index]]);
             }
         }
+
+        // Send Notification For All Customers
+        sendFireBaseNotification(User::customer()->get(), __('notification.new_item', ['name' => $item->name]));
 
         return (new ItemResource($item))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
@@ -68,25 +72,26 @@ class ItemController extends Controller
 
             $validated = $request->safe();
 
-            $item->update($validated->merge(['user_id' => Auth::id()]));
+            $item->update($validated->merge(['user_id' => Auth::id()])->all());
 
-            if ($request->has('size_id') && getSettings()->size == 1) {
+            if ($request->has('sizes') && getSettings()->size == 1) {
                 foreach ($validated['sizes'] as $size) {
                     $item->sizes()->sync(['size_id' => $size]);
                 }
             }
 
-            if ($request->has('color_id') && getSettings()->color == 1) {
+            if ($request->has('colors') && getSettings()->color == 1) {
                 foreach ($validated['colors'] as $color) {
                     $item->colors()->sync(['color_id' => $color]);
                 }
             }
 
             if ($request->has('store_id') && getSettings()->store == 1) {
-                foreach ($validated['stores'] as $index => $store) {
-                    $item->stores()->updateExistingPivot($store, ['quantity' => $validated['quantity'][$index]]);
-                }
+                $item->stores()->updateExistingPivot($validated['store_id'], ['quantity' => $validated['quantity']]);
             }
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.update_item', ['name' => $item->name, 'store' => Store::find($validated['store_id'])->name]));
 
             return (new ItemResource($item))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
@@ -102,6 +107,10 @@ class ItemController extends Controller
         if ($response->allowed()) {
 
             $item->delete();
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.delete_item', ['name' => $item->name]));
+
             return new BasicResource(true, __('messages.delete_success'), 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');
@@ -118,6 +127,9 @@ class ItemController extends Controller
 
                 // Delete item from store
                 $item->stores()->detach($store->id);
+
+                // Send Notification For Authorized Merchant
+                sendFireBaseNotification(Auth::user(), __('notification.delete_item_store', ['name' => $item->name, 'store' => $store->name]));
 
                 return new BasicResource(true, __('messages.delete_success'), 'message');
             } else {

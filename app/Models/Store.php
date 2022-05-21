@@ -22,7 +22,8 @@ class Store extends Model
         'lat',
         'lng',
         'online',
-        'city_id'
+        'city_id',
+        'user_id',
     ];
 
     public function getNameAttribute()
@@ -55,6 +56,11 @@ class Store extends Model
     public function scopeWhereOnline($query)
     {
         return $query->where('online', 1);
+    }
+
+    public function scopeAuth($query)
+    {
+        return $query->where('user_id', auth('api')->id());
     }
 
     public function city()

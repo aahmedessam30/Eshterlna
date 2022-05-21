@@ -18,7 +18,10 @@ class UserController extends Controller
     public function editProfile(ProfileRequest $request)
     {
         $user = Auth::user();
-        $user->update($request->validated());
+        $user->update($request->safe()->all());
+
+        // Send Notification For Authorized User
+        sendFireBaseNotification(Auth::user(), __('notification.profile_updated'));
 
         return (new UserResource(Auth::user()))->additional(['status' => true, 'message' => __('auth.edit_profile_success')]);
     }

@@ -63,6 +63,11 @@ class Order extends Model
         return Carbon::parse($value)->format('d-m-Y H:i:s');
     }
 
+    public function scopeAuth($query)
+    {
+        return $query->where('user_id', auth('api')->id());
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

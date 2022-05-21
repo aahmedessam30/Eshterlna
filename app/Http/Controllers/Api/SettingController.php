@@ -27,6 +27,10 @@ class SettingController extends Controller
     public function store(SettingRequest $request)
     {
         $setting = Setting::create($request->safe()->merge(['user_id' => Auth::id()])->all());
+
+        // Send Notification For Authorized Merchant
+        sendFireBaseNotification(Auth::user(), __('notification.setting_added'));
+
         return (new SettingResource($setting))
             ->additional(['status' => true, 'message' => __('messages.store_success.')]);
     }
@@ -42,6 +46,10 @@ class SettingController extends Controller
 
         if ($response->allowed()) {
             $setting->update($request->safe()->merge(['user_id' => Auth::id()])->all());
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.setting_updated'));
+
             return (new SettingResource($setting))
                 ->additional(['status' => true, 'message' => __('messages.update_success.')]);
         } else {
@@ -56,7 +64,11 @@ class SettingController extends Controller
 
         if ($response->allowed()) {
             $setting->delete();
-            return new BasicResource(true, __('messages.delete_success.'), 'message');
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.setting_deleted'));
+
+            return new BasicResource(true, __('messages.delete_success'), 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');
         }

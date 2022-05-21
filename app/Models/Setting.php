@@ -27,6 +27,7 @@ class Setting extends Model
         'store',
         'delivery',
         'payment',
+        'user_id',
     ];
 
     public function setImageAttribute($value)

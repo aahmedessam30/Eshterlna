@@ -7,6 +7,8 @@ use App\Http\Requests\BrandRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BrandResource;
 use App\Http\Resources\BasicResource;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class BrandController extends Controller
@@ -24,7 +26,11 @@ class BrandController extends Controller
 
     public function store(BrandRequest $request)
     {
-        $brand = Brand::create($request->validated());
+        $brand = Brand::create($request->safe()->merge(['user_id' => auth()->id()])->all());
+
+        // Send Notification For All Customers
+        sendFireBaseNotification(User::customer()->get(), __('notification.new_brand', ['name' => $brand->name]));
+
         return (new BrandResource($brand))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
     }
@@ -40,7 +46,11 @@ class BrandController extends Controller
 
         if ($response->allowed()) {
 
-            $brand->update($request->validated());
+            $brand->update($request->safe()->merge(['user_id' => auth()->id()])->all());
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.update_brand', ['name' => $brand->name]));
+
             return (new BrandResource($brand))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
         } else {
@@ -55,6 +65,10 @@ class BrandController extends Controller
         if ($response->allowed()) {
 
             $brand->delete();
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.delete_brand', ['name' => $brand->name]));
+
             return new BasicResource(true, __('messages.delete_success'), 'message');
         } else {
             return new BasicResource(false, $response->message(), 'message');

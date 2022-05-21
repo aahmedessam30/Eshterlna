@@ -11,7 +11,7 @@ class Color extends Model
 {
     use HasFactory, BasicTrait;
 
-    protected $fillable = ['name_ar', 'name_en', 'image', 'colorHash', 'online'];
+    protected $fillable = ['name_ar', 'name_en', 'image', 'colorHash', 'online', 'user_id'];
 
     public function scopeWhereOnline($query)
     {

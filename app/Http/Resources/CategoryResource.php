@@ -25,7 +25,7 @@ class CategoryResource extends JsonResource
             'created_at'   => $this->created_at->diffForHumans(),
             'updated_at'   => $this->updated_at->diffForHumans(),
             $this->mergeWhen(count($this->subCategories) > 0, [
-                'category' => CategoryResource::collection($this->subCategories),
+                'category' => CategoryResource::collection($this->whenLoaded('subCategories')),
             ]),
         ];
     }

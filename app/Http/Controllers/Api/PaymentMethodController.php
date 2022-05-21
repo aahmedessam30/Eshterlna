@@ -28,6 +28,9 @@ class PaymentMethodController extends Controller
     {
         $paymentMethod = PaymentMethod::create($request->safe()->merge(['user_id' => Auth::id()])->all());
 
+        // Send Notification For Authorized Merchant
+        sendFireBaseNotification(Auth::user(), __('notification.payment_method_added' , ['name' => $paymentMethod->name]));
+
         return (new PaymentMethodResource($paymentMethod))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
     }
@@ -44,6 +47,9 @@ class PaymentMethodController extends Controller
         if ($response->allowed()) {
             $paymentMethod->update($request->safe()->merge(['user_id' => Auth::id()])->all());
 
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.payment_method_updated' , ['name' => $paymentMethod->name]));
+
             return (new PaymentMethodResource($paymentMethod))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
         }else {
@@ -57,6 +63,9 @@ class PaymentMethodController extends Controller
 
         if ($response->allowed()) {
             $paymentMethod->delete();
+
+            // Send Notification For Authorized Merchant
+            sendFireBaseNotification(Auth::user(), __('notification.payment_method_deleted' , ['name' => $paymentMethod->name]));
 
             return new BasicResource(true, __('messages.delete_success') , 'message');
         }else {
