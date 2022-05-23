@@ -34,6 +34,6 @@ class VerifyEmailController extends Controller
     public function resend(Request $request)
     {
         $request->user()->sendEmailVerificationNotification();
-        return new BasicResource(true, __('auth.verification_email_sent'), 'message');
+        return new BasicResource(true, __('auth.email_verification_link_sent'), 'message');
     }
 }
