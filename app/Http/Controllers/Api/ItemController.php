@@ -24,7 +24,11 @@ class ItemController extends Controller
 
     public function index()
     {
-        return ItemResource::collection(Item::whereOnline()->latest('id')->paginate(config('global.pagination')))
+        $items = Auth::check() && Auth::user()->type == 'merchant'
+            ? Item::whereOnline()->auth()
+            : Item::whereOnline();
+
+        return ItemResource::collection($items->latest('id')->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 

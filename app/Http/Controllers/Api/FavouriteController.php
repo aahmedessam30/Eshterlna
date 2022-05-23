@@ -20,7 +20,7 @@ class FavouriteController extends Controller
 
     public function index()
     {
-        return FavouriteResource::collection(Favourite::latest('id')->paginate(config('global.pagination')))
+        return FavouriteResource::collection(Favourite::auth()->latest('id')->paginate(config('global.pagination')))
             ->additional(['status' => 'success']);
     }
 
@@ -33,7 +33,6 @@ class FavouriteController extends Controller
 
         return (new FavouriteResource($favourite))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
-
     }
 
     public function destroy(Favourite $favourite)

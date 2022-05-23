@@ -61,6 +61,11 @@ class Category extends Model
         return $query->where('online', 1);
     }
 
+    public function scopeAuth($query)
+    {
+        return $query->where('user_id', auth('api')->id());
+    }
+
     public function items()
     {
         return $this->hasMany(Item::class);

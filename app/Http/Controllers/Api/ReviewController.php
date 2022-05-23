@@ -21,9 +21,11 @@ class ReviewController extends Controller
 
     public function index(ReviewRequest $request)
     {
-        return ReviewResource::collection(Review::where('item_id', $request->safe()->item_id)
-            ->latest()
-            ->paginate(config('global.pagination')))
+        $reviews = Auth::check() && Auth::user()->type == 'merchant'
+            ? Review::auth()->where('item_id', $request->safe()->item_id)
+            : Review::where('item_id', $request->safe()->item_id);
+
+        return ReviewResource::collection($reviews->latest()->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 

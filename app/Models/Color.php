@@ -18,6 +18,11 @@ class Color extends Model
         return $query->where('online', 1);
     }
 
+    public function scopeAuth($query)
+    {
+        return $query->where('user_id', auth('api')->id());
+    }
+
     public function getNameAttribute()
     {
         return $this->{'name_' . App::getLocale()};

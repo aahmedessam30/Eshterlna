@@ -20,7 +20,11 @@ class BrandController extends Controller
 
     public function index()
     {
-        return BrandResource::collection(Brand::whereOnline()->latest('id')->paginate(config('global.paginate')))
+        $brands = Auth::check() && Auth::user()->type == 'merchant'
+            ? Brand::whereOnline()->auth()
+            : Brand::whereOnline();
+
+        return BrandResource::collection($brands->latest('id')->paginate(config('global.paginate')))
             ->additional(['status' => true]);
     }
 

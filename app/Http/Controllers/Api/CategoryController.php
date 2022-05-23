@@ -22,7 +22,11 @@ class CategoryController extends Controller
 
     public function index()
     {
-        return CategoryResource::collection(Category::whereOnline()->latest('id')->paginate(config('global.pagination')))
+        $categories = Auth::check() && Auth::user()->type == 'merchant'
+            ? Category::whereOnline()->auth()
+            : Category::whereOnline();
+
+        return CategoryResource::collection($categories->latest('id')->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 

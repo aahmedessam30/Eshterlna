@@ -21,7 +21,11 @@ class ColorController extends Controller
 
     public function index()
     {
-        return ColorResource::collection(Color::whereOnline()->latest('id')->paginate(config('global.pagination')))
+        $colors = Auth::check() && Auth::user()->type == 'merchant'
+            ? Color::whereOnline()->auth()
+            : Color::whereOnline();
+
+        return ColorResource::collection($colors->latest('id')->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 
