@@ -29,9 +29,9 @@ class AuthController extends Controller
             return new BasicResource(false, __('auth.failed'));
         }
 
-        // if (Auth::user()->email_verified_at == null && Auth::user()->status == 'in_active') {
-        //     return new BasicResource(false, __('auth.email_not_verified'));
-        // }
+        if (Auth::user()->email_verified_at == null && Auth::user()->status == 'in_active') {
+            return new BasicResource(false, __('auth.email_not_verified'));
+        }
 
         $user = Auth::user();
         $token = $user->createToken("Personal Access Token")->accessToken;
