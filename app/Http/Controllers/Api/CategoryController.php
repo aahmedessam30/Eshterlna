@@ -26,7 +26,7 @@ class CategoryController extends Controller
             ? Category::whereOnline()->auth()
             : Category::whereOnline();
 
-        return CategoryResource::collection($categories->latest('id')->paginate(config('global.pagination')))
+        return CategoryResource::collection($categories->with('subCategories')->latest()->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 
@@ -43,7 +43,7 @@ class CategoryController extends Controller
 
     public function show(Category $category)
     {
-        return (new CategoryResource($category))->additional(['status' => true]);
+        return (new CategoryResource($category->load('items')))->additional(['status' => true]);
     }
 
     public function update(CategoryRequest $request, Category $category)

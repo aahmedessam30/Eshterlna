@@ -2,24 +2,34 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers;
-use App\Models\Item;
-use App\Http\Controllers\Controller;
+use App\Models\{User, Item, Store};
 use App\Http\Requests\ItemRequest;
-use App\Models\Store;
-use App\Models\User;
-use Illuminate\Support\Facades\App;
-use App\Http\Resources\ItemResource;
-use App\Http\Resources\BasicResource;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Http\Resources\ItemResource;
+use App\Http\Resources\BasicResource;
 
 
 class ItemController extends Controller
 {
+    protected $relationships = ['category', 'brand', 'merchant', 'vat'];
+
     public function __construct()
     {
         $this->middleware(['auth:api', 'merchant'])->except(['index', 'show']);
+
+        if (getSettings()->size == 1) {
+            array_push($this->relationships, 'sizes');
+        }
+
+        if (getSettings()->color == 1) {
+            array_push($this->relationships, 'colors');
+        }
+
+        if (getSettings()->store == 1) {
+            array_push($this->relationships, 'stores');
+        }
     }
 
     public function index()
@@ -28,7 +38,8 @@ class ItemController extends Controller
             ? Item::whereOnline()->auth()
             : Item::whereOnline();
 
-        return ItemResource::collection($items->latest('id')->paginate(config('global.pagination')))
+        return ItemResource::collection($items->with($this->relationships)
+            ->latest('id')->paginate(config('global.pagination')))
             ->additional(['status' => true]);
     }
 
@@ -59,13 +70,14 @@ class ItemController extends Controller
         // Send Notification For All Customers
         sendFireBaseNotification(User::customer()->get(), __('notification.new_item', ['name' => $item->name]));
 
-        return (new ItemResource($item))
+        return (new ItemResource($item->with($this->relationships)))
             ->additional(['status' => true, 'message' => __('messages.store_success')]);
     }
 
     public function show(Item $item)
     {
-        return (new ItemResource($item))->additional(['status' => true]);
+        return (new ItemResource($item->load($this->relationships)))
+            ->additional(['status' => true]);
     }
 
     public function update(ItemRequest $request, Item $item)
@@ -97,7 +109,7 @@ class ItemController extends Controller
             // Send Notification For Authorized Merchant
             sendFireBaseNotification(Auth::user(), __('notification.update_item', ['name' => $item->name, 'store' => Store::find($validated['store_id'])->name]));
 
-            return (new ItemResource($item))
+            return (new ItemResource($item->with($this->relationships)))
                 ->additional(['status' => true, 'message' => __('messages.update_success')]);
         } else {
             return new BasicResource(false, $response->message(), 'message');
@@ -144,4 +156,3 @@ class ItemController extends Controller
         }
     }
 }
-

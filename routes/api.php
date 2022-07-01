@@ -2,24 +2,25 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\StoreController;
+use App\Http\Controllers\Api\VatController;
+use App\Http\Controllers\Api\CityController;
+use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\SizeController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BrandController;
-use App\Http\Controllers\Api\CountryController;
-use App\Http\Controllers\Api\CityController;
-use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\ColorController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\StoreController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\CountryController;
+use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\FavouriteController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\ShippingMethodController;
-use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\FavouriteController;
-use App\Http\Controllers\Api\ColorController;
-use App\Http\Controllers\Api\SizeController;
-use App\Http\Controllers\Api\VatController;
-use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\Auth\ForgetPasswordController;
 
@@ -54,6 +55,10 @@ Route::middleware(['auth:api', 'verified'])->group(function () {
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::post('/edit-profile', [UserController::class, 'editProfile'])->name('edit-profile');
 });
+
+//Home Routes
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::post('search', [HomeController::class, 'search'])->name('search');
 
 Route::apiResource('countries', CountryController::class);
 Route::apiResource('cities', CityController::class);

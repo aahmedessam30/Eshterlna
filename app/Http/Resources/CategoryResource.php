@@ -16,17 +16,16 @@ class CategoryResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'           => $this->id,
-            'name'         => $this->name,
-            'description'  => $this->description,
-            'image'        => $this->image,
-            'status'       => $this->category_id,
-            'online'       => $this->online,
-            'created_at'   => $this->created_at->diffForHumans(),
-            'updated_at'   => $this->updated_at->diffForHumans(),
-            $this->mergeWhen(count($this->subCategories) > 0, [
-                'category' => CategoryResource::collection($this->whenLoaded('subCategories')),
-            ]),
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'description' => $this->description,
+            'image'       => $this->image,
+            'status'      => $this->category_id,
+            'online'      => $this->online,
+            'created_at'  => $this->created_at->diffForHumans(),
+            'updated_at'  => $this->updated_at->diffForHumans(),
+            'category'    => CategoryResource::collection($this->whenLoaded('subCategories')),
+            'items'       => ItemResource::collection($this->whenLoaded('items')),
         ];
     }
 }

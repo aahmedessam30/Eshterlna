@@ -11,8 +11,6 @@ class Item extends Model
 {
     use HasFactory, BasicTrait;
 
-    protected $with = ['category', 'brand', 'merchant' , 'vat'];
-
     protected $fillable = [
         'name_ar',
         'name_en',
@@ -31,21 +29,6 @@ class Item extends Model
         'vat_id',
         'vat_state'
     ];
-
-//    public function __construct()
-//    {
-//        if (getSettings()->size == 1) {
-//            array_push($this->with, 'sizes');
-//        }
-//
-//        if (getSettings()->color == 1) {
-//            array_push($this->with, 'colors');
-//        }
-//
-//        if (getSettings()->store == 1) {
-//            array_push($this->with, 'stores');
-//        }
-//    }
 
     public function getNameAttribute()
     {
