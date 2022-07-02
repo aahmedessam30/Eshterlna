@@ -49,9 +49,9 @@ class Category extends Model
             : (App::isLocale('ar') ? 'مفعل' : 'Active');
     }
 
-    public function getCategoryIdAttribute($value)
+    public function getStatusAttribute()
     {
-        return $value == 0
+        return $this->category_id == 0
             ? (App::isLocale('ar') ? 'قسم رئيسى' : 'Main Category')
             : (App::isLocale('ar') ? 'قسم فرعى' : 'Sub Category');
     }
@@ -73,11 +73,11 @@ class Category extends Model
 
     public function subCategories()
     {
-        return $this->hasMany(Category::class, 'category_id');
+        return $this->hasMany(Category::class, 'category_id', 'id');
     }
 
     public function mainCategory()
     {
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 }
